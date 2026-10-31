@@ -1,0 +1,36 @@
+{
+  "minecraft": "1.21.1",
+  "neoforge": "21.1.265",
+  "modpack": {
+    "version": "0.1.0",
+    "url": "https://exemple.net/downloads/pokemon-unity-modpack-0.1.0.zip",
+    "sha256": "REMPLACE-PAR-LE-SHA256-DU-ZIP",
+    "size": 0,
+    "changelog": "Première version jouable."
+  },
+  "server": { "name": "Pokémon Unity", "address": "play.exemple.net" },
+  "maintenance": "",
+  "news": [
+    {
+      "id": "2026-10-30-breche",
+      "title": "La brèche des Plaines Venteuses s'ouvre",
+      "date": "2026-10-30",
+      "tag": "ÉVÉNEMENT",
+      "summary": "La Team Origin a été repérée près de la tour fédérale. Les dresseurs de niveau 20 et plus sont invités à former un groupe de 4.",
+      "url": ""
+    }
+  ],
+  "bosses": [
+    {
+      "id": "breche-01",
+      "name": "Dracaufeu corrompu",
+      "form": "Anomalie",
+      "level": 62,
+      "status": "active",
+      "hp_percent": 64.2,
+      "players": 183,
+      "ends_at": "2026-11-01T20:00:00Z",
+      "description": "Une brèche s'est ouverte près de la tour fédérale. Toute la région participe au combat."
+    }
+  ]
+}
