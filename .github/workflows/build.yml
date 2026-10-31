@@ -3,47 +3,31 @@ on:
   workflow_dispatch:
   push:
     tags: ["v*"]
-permissions:
-  contents: write
 jobs:
-  windows:
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: bash
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+          - os: ubuntu-22.04
+          - os: macos-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - name: Dépendances Linux
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libdbus-1-dev
       - uses: dtolnay/rust-toolchain@stable
       - uses: swatinem/rust-cache@v2
         with:
           workspaces: src-tauri
-      - name: Installer tauri-cli
-        run: cargo install tauri-cli --version "^2" --locked
-      - name: Compiler le launcher
-        run: |
-          set +e
-          cargo tauri build 2>&1 | tee build.log
-          echo "exit=${PIPESTATUS[0]}" >> build.log
-          exit 0
-      - name: Publier le journal sur la branche ci-logs-windows
-        run: |
-          tail -n 400 build.log > /tmp/build-tail.log
-          git config user.name "ci"
-          git config user.email "ci@example.com"
-          git checkout --orphan ci-logs-windows
-          git rm -rf . >/dev/null 2>&1 || true
-          cp /tmp/build-tail.log build.log
-          git add build.log
-          git commit -m "journal de compilation windows"
-          git push -f origin ci-logs-windows
-      - name: Publier l'installateur
-        if: always()
-        uses: softprops/action-gh-release@v2
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: build-${{ github.run_number }}
-          name: "Launcher build ${{ github.run_number }}"
-          prerelease: true
-          files: |
-            src-tauri/target/release/bundle/nsis/*.exe
-            src-tauri/target/release/bundle/msi/*.msi
-          fail_on_unmatched_files: false
+          tagName: ${{ github.ref_name }}
+          releaseName: "Pokémon Unity Launcher ${{ github.ref_name }}"
+          releaseDraft: true
