@@ -1,0 +1,36 @@
+name: Diagnose compilation
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dépendances Linux
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libdbus-1-dev pkg-config
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: cargo check
+        working-directory: src-tauri
+        run: |
+          set +e
+          cargo check --message-format=short 2>&1 | tee ../check.log
+          echo "exit=${PIPESTATUS[0]}" >> ../check.log
+          exit 0
+      - name: Publier le journal sur la branche ci-logs
+        run: |
+          mkdir /tmp/logs && cp check.log /tmp/logs/check.log
+          git config user.name "ci"
+          git config user.email "ci@example.com"
+          git checkout --orphan ci-logs
+          git rm -rf . >/dev/null 2>&1 || true
+          cp /tmp/logs/check.log check.log
+          git add check.log
+          git commit -m "journal de compilation"
+          git push -f origin ci-logs
